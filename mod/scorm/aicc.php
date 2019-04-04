@@ -217,7 +217,8 @@ if (!empty($command)) {
                         $datamodel['[comments]'] = 'cmi.comments';
                         $datarows = explode("\r\n", $aiccdata);
                         reset($datarows);
-                        foreach ($datarows as $datarow) {
+                        for($index=0; $index < count($datarows); $index++){
+                            $datarow = $datarows[$index];
                             if (($equal = strpos($datarow, '=')) !== false) {
                                 $element = strtolower(trim(substr($datarow, 0, $equal)));
                                 $value = trim(substr($datarow, $equal + 1));
@@ -306,9 +307,13 @@ if (!empty($command)) {
                                 if (isset($datamodel[strtolower(trim($datarow))])) {
                                     $element = $datamodel[strtolower(trim($datarow))];
                                     $value = '';
-                                    while ((($datarow = current($datarows)) !== false) && (substr($datarow, 0, 1) != '[')) {
-                                        $value .= $datarow."\r\n";
-                                        next($datarows);
+                                    for($start = $index+1; $start < count($datarows); $start++){
+                                        if((($row = $datarows[$start]) !== false) && (substr($row, 0, 1) != '[')){
+                                            $index = $start;
+                                            $value .= $row."\r\n";
+                                        } else {
+                                            break;
+                                        }
                                     }
                                     $value = rawurlencode($value);
                                     $id = scorm_insert_track($aiccuser->id, $scorm->id, $sco->id, $attempt, $element, $value);
